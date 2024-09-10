@@ -1,4 +1,7 @@
-basicCalculator(process.argv[2], process.argv[3], process.argv[4]);
+{
+    let arguments = process.argv.slice(2);
+    basicCalculator.apply(null, arguments);
+}
 
 function basicCalculator(firstNum, secondNum, operator) {
     // convert string arguments to numbers
