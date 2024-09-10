@@ -1,6 +1,11 @@
 isPalindrome(process.argv[2], process.argv[3]);
 
 function isPalindrome(arg, enableDebug) {
+    if(!arg) {
+        console.log("Invalid Argument");
+        return;
+    }
+
     // Strip non-alphabetic characters & unify casing
     arg = arg.replace(/([$&+,:;=?@#|'"<>.^*(){}%~_\[\]!-])|(\s)/g, "").toLowerCase();
 
