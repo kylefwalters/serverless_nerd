@@ -20,6 +20,10 @@ function basicCalculator(firstNum, secondNum, operator) {
         case '/':
             result = firstNum / secondNum;
             break;
+        default:
+            console.log(`Operator "${operator}" is invalid`);
+            return null;
     }
     console.log(`${firstNum} ${operator} ${secondNum} = ${result}`);
+    return result;
 }
