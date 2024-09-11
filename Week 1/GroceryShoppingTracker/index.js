@@ -60,20 +60,29 @@ function askForItemName() {
 
 function askForItemQuantity(groceryItem) {
     rl.question("(2/3) How many of the item do you want? ", (quantity) => {
-        groceryItem.quantity = quantity;
-
-        askForItemPrice(groceryItem);
+        if(isNaN(quantity)) {
+            console.log("Invalid input, try again");
+            askForItemQuantity(groceryItem);
+        }else {
+            groceryItem.quantity = quantity;
+            askForItemPrice(groceryItem);
+        }
     });
 }
 
 function askForItemPrice(groceryItem) {
     rl.question("(3/3) What is the price of the item? $", (price) => {
-        groceryItem.price = price;
-        groceryList.push(groceryItem);
-        console.log("Great, item added");
-
-        showGroceryList();
-        askToModifyList();
+        if(isNaN(price)) {
+            console.log("Invalid input, try again");
+            askForItemPrice(groceryItem);
+        }else {
+            groceryItem.price = price;
+            groceryList.push(groceryItem);
+            console.log("Great, item added");
+    
+            showGroceryList();
+            askToModifyList();
+        }
     });
 }
 
