@@ -1,0 +1,15 @@
+{
+  "name": "fizzbuzz",
+  "version": "1.0.0",
+  "description": "program that accepts a number n, and prints numbers in order from 1 to n, except for every multiple of 3, where it will print Fizz, or every multiple of 5, where it will print Buzz",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "keywords": [
+    "fizzbuzz"
+  ],
+  "author": "Kyle W",
+  "license": "ISC"
+}
