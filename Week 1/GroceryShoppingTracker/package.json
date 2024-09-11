@@ -1,0 +1,19 @@
+{
+  "name": "groceryshoppingtracker",
+  "version": "1.0.0",
+  "description": "Tracks grocery items in a shopping list",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "keywords": [
+    "grocery",
+    "tracker",
+    "node",
+    "js",
+    "javascript"
+  ],
+  "author": "Kyle W",
+  "license": "ISC"
+}
