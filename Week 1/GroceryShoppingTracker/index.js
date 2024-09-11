@@ -99,8 +99,12 @@ function removeItem() {
 function modifyItem() {
     showGroceryList();
     rl.question("Type the index of the item you have bought: ", (index) => {
-        groceryList[index - 1].bought = true;
-        console.log("Item marked as bought");
+        if(index > 0 && index < groceryList.length) {
+            groceryList[index - 1].bought = true;
+            console.log("Item marked as bought");
+        }else {
+            console.log("Invalid index, returning to options");
+        }
         
         askToModifyList();
     });
