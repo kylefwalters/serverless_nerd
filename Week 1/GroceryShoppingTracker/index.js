@@ -1,29 +1,52 @@
+const http = require('http');
 const { GroceryItem } = require('./GroceryItem');
-const readline = require('readline');
 
-let userName;
-const groceryList = [];
+setUpServer();
 
-const rl = readline.createInterface({
-  input: process.stdin, // Read from standard input (keyboard)
-  output: process.stdout // Write to standard output (console)
-});
+const groceryList = [new GroceryItem("Test", 1, 21)];
 
-rl.question('Enter name: ', (name) => {
-    userName = name;
-	console.log(`Welcome, ${userName}`);
-    console.log("Enter the details of the first item to add to your list");
-    askForItemName();
-});
+function setUpServer() {
+    const server = http.createServer((req, res) => {
+        console.log(`Received ${req.method} request`);
+        // TODO: read & write grocery list to groceries.json
+        let body = '';
+        switch(req.method){
+            case 'GET':
+                res.writeHead(200, {'Content-Type': 'text/plain'});
+                res.write(JSON.stringify(groceryList));
+                res.end();
+                break;
+            case 'POST':
 
-rl.on('line', (line) => {
-    console.log(line);
-});
+                // Parse request body
+                const newGrocery = JSON.parse(body);
+                console.log(`Parsed content: ${newGrocery}`);
+                // TODO: parse received body into GroceryItem, then add to list
+                break;
+            case 'PUT':
+                // TODO: update grocery list
+                break;
+            case 'DELETE':
+                // TODO: remove item from grocery list
+                break;
+            default:
+                break;
+        }
+        handleRequest(req, res);
+    })
 
-rl.once('close', () => {
-    // end of input
-    console.log(`\nGoodbye, ${userName}`);
-});
+    const port = '3000';
+    server.listen(port, () => {
+        const address = server.address();
+        console.log(`Server opened on localhost:${address.port}`);
+    });
+}
+
+function handleRequest(req, res) {
+}
+
+function getGroceryList(res) {
+}
 
 function askToModifyList() {
     rl.question("What would you like to do? (add/remove/bought/list)", (response) => {
