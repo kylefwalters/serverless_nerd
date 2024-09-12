@@ -2,9 +2,8 @@ const http = require('http');
 const url = require('url');
 const winston = require('winston');
 const {format} = require('winston');
+const fs = require('fs');
 const { GroceryItem } = require('./GroceryItem');
-
-const groceryList = [new GroceryItem("Test", 1, 123)];
 
 // Create logger instance
 const logger = winston.createLogger({
@@ -19,7 +18,6 @@ const logger = winston.createLogger({
 setUpServer();
 
 function setUpServer() {
-    // TODO: read & write grocery list to groceries.json
     const server = http.createServer( (req, res) => {
         handleRequests(req, res);
     });
@@ -39,6 +37,21 @@ function handleRequests(req, res) {
         body += chunk;
     });
 
+    // Get grocery list from .json
+    let groceryList;
+    const fileName = 'groceries.json';
+    if(fs.existsSync(fileName)) {
+        groceryList = JSON.parse(fs.readFileSync(fileName, 'utf8'));
+        // convert each item in array to GroceryItem
+        for(i = 0; i < groceryList.length; i++) {
+            groceryList[i] = Object.assign(new GroceryItem(), groceryList[i]);
+        }
+    } else {
+        groceryList = [new GroceryItem("Test", 1, 123)];
+        const data = new Uint8Array(Buffer.from(JSON.stringify(groceryList)));
+        fs.writeFileSync(fileName, data);
+    }
+
     switch(req.method){
         case 'GET':
             res.writeHead(200, {'Content-Type': 'text/plain'});
@@ -49,9 +62,10 @@ function handleRequests(req, res) {
             req.on('end', () => {
                 const newGrocery = Object.assign(new GroceryItem(), JSON.parse(body));
                 groceryList.push(newGrocery);
-                showGroceryList();
-
-                res.writeHead(201, {'Content-Type': 'text/plain'});
+                updateGroceryJSON(groceryList, fileName);
+                showGroceryList(groceryList);
+        
+                res.writeHead(201, { 'Content-Type': 'text/plain' });
                 res.write(JSON.stringify(groceryList));
                 res.end();
             });
@@ -64,7 +78,8 @@ function handleRequests(req, res) {
                 req.on('end', () => {
                     const newGroceryStatus = JSON.parse(body);
                     groceryList[index].bought = newGroceryStatus.bought;
-                    showGroceryList();
+                    updateGroceryJSON(groceryList, fileName);
+                    showGroceryList(groceryList);
                     
                     res.writeHead(200, {'Content-Type': 'text/plain'});
                     res.write(JSON.stringify(groceryList[index]));
@@ -80,7 +95,8 @@ function handleRequests(req, res) {
                 req.on('end', () => {
                     const deletedItem = groceryList[index];
                     groceryList.splice(index, 1);
-                    showGroceryList();
+                    updateGroceryJSON(groceryList, fileName);
+                    showGroceryList(groceryList);
                     
                     res.writeHead(200, {'Content-Type': 'text/plain'});
                     res.write(JSON.stringify(deletedItem));
@@ -93,10 +109,15 @@ function handleRequests(req, res) {
     }
 }
 
-function showGroceryList() {
+function showGroceryList(groceryList) {
     console.log("______________________________________________________________");
     for(i = 0; i < groceryList.length; i++) {
         console.log((i + 1) + ". " + groceryList[i].toString());
     }
     console.log("______________________________________________________________");
+}
+
+function updateGroceryJSON(groceryList, fileName) {
+    const data = new Uint8Array(Buffer.from(JSON.stringify(groceryList)));
+    fs.writeFileSync(fileName, data);
 }
