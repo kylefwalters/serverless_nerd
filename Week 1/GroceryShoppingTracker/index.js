@@ -1,4 +1,5 @@
 const http = require('http');
+const url = require('url');
 const { GroceryItem } = require('./GroceryItem');
 
 setUpServer();
@@ -7,9 +8,14 @@ const groceryList = [new GroceryItem("Test", 1, 21)];
 
 function setUpServer() {
     const server = http.createServer((req, res) => {
-        console.log(`Received ${req.method} request`);
         // TODO: read & write grocery list to groceries.json
+        console.log(`Received ${req.method} request`);
+        // Parse body
         let body = '';
+        req.on('data', (chunk) => {
+            body += chunk;
+        });
+
         switch(req.method){
             case 'GET':
                 res.writeHead(200, {'Content-Type': 'text/plain'});
@@ -17,17 +23,47 @@ function setUpServer() {
                 res.end();
                 break;
             case 'POST':
+                req.on('end', () => {
+                    const newGrocery = Object.assign(new GroceryItem(), JSON.parse(body));
+                    groceryList.push(newGrocery);
+                    showGroceryList();
 
-                // Parse request body
-                const newGrocery = JSON.parse(body);
-                console.log(`Parsed content: ${newGrocery}`);
-                // TODO: parse received body into GroceryItem, then add to list
+                    res.writeHead(201, {'Content-Type': 'text/plain'});
+                    res.write(JSON.stringify(groceryList));
+                    res.end();
+                });
                 break;
             case 'PUT':
-                // TODO: update grocery list
+                {
+                    const queryObject = url.parse(req.url, true).query;
+                    const index = queryObject.index;
+
+                    req.on('end', () => {
+                        const newGroceryStatus = JSON.parse(body);
+                        groceryList[index].bought = newGroceryStatus.bought;
+                        showGroceryList();
+                        
+                        res.writeHead(200, {'Content-Type': 'text/plain'});
+                        res.write(JSON.stringify(groceryList[index]));
+                        res.end();
+                    });
+                }
                 break;
             case 'DELETE':
-                // TODO: remove item from grocery list
+                {
+                    const queryObject = url.parse(req.url, true).query;
+                    const index = queryObject.index;
+    
+                    req.on('end', () => {
+                        const deletedItem = groceryList[index];
+                        groceryList.splice(index, 1);
+                        showGroceryList();
+                        
+                        res.writeHead(200, {'Content-Type': 'text/plain'});
+                        res.write(JSON.stringify(deletedItem));
+                        res.end();
+                    });
+                }
                 break;
             default:
                 break;
