@@ -1,10 +1,22 @@
 const http = require('http');
 const url = require('url');
+const winston = require('winston');
+const {format} = require('winston');
 const { GroceryItem } = require('./GroceryItem');
 
-setUpServer();
+const groceryList = [new GroceryItem("Test", 1, 123)];
 
-const groceryList = [new GroceryItem("Test", 1, 21)];
+// Create logger instance
+const logger = winston.createLogger({
+    level: 'info',
+    format: format.combine(
+        format.timestamp(), 
+        format.printf(({timestamp, level, message}) => {return `${timestamp} [${level}]: ${message}`})
+    ),
+    transports: [new winston.transports.Console(), new winston.transports.File({filename: 'app.log'})]
+});
+
+setUpServer();
 
 function setUpServer() {
     // TODO: read & write grocery list to groceries.json
@@ -15,12 +27,12 @@ function setUpServer() {
     const port = '3000';
     server.listen(port, () => {
         const address = server.address();
-        console.log(`Server opened on localhost:${address.port}`);
+        logger.log('info', `Server opened on localhost:${address.port}`);
     });
 }
 
 function handleRequests(req, res) {
-    console.log(`Received ${req.method} request`);
+    logger.log('info', `Received ${req.method} request`);
     // Parse body
     let body = '';
     req.on('data', (chunk) => {
