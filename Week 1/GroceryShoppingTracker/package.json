@@ -17,6 +17,7 @@
   "author": "Kyle W",
   "license": "ISC",
   "dependencies": {
+    "jest": "^29.7.0",
     "winston": "^3.14.2"
   }
 }
