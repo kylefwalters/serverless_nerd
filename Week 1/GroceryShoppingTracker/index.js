@@ -54,9 +54,8 @@ function handleRequests(req, res) {
 
     switch(req.method){
         case 'GET':
-            res.writeHead(200, {'Content-Type': 'text/plain'});
-            res.write(JSON.stringify(groceryList));
-            res.end();
+            res.writeHead(200, {'Content-Type': 'text/plain'})
+            .end(JSON.stringify(groceryList));
             break;
         case 'POST':
             req.on('end', () => {
