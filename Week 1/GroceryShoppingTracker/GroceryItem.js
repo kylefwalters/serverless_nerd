@@ -1,9 +1,9 @@
 class GroceryItem {
-    constructor(name, quantity, price) {
+    constructor(name, quantity, price, bought = false) {
         this.name = name;
         this.quantity = quantity;
         this.price = price;
-        this.bought = false;
+        this.bought = bought;
     }
 
     toString() {

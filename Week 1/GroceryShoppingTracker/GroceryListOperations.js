@@ -33,10 +33,11 @@ function postGroceryList(body, res) {
         res.write(JSON.stringify(groceryList));
         res.end();
     }
+    return groceryList;
 }
 
-function putGroceryList(req, body, res) {
-    const queryObject = url.parse(req.url, true).query;
+function putGroceryList(queryParams, body, res) {
+    const queryObject = url.parse(queryParams, true).query;
     const index = queryObject.index;
     const groceryList = readGroceryList();
     const newGroceryStatus = JSON.parse(body);
@@ -45,13 +46,15 @@ function putGroceryList(req, body, res) {
     writeGroceryList(groceryList, fileName);
     showGroceryList(groceryList);
 
-    res.writeHead(200, { 'Content-Type': 'text/plain' });
-    res.write(JSON.stringify(groceryList[index]));
-    res.end();
+    res?.writeHead(200, { 'Content-Type': 'text/plain' });
+    res?.write(JSON.stringify(groceryList[index]));
+    res?.end();
+
+    return groceryList[index];
 }
 
-function deleteGroceryList(req, res) {
-    const queryObject = url.parse(req.url, true).query;
+function deleteGroceryList(queryParams, res) {
+    const queryObject = url.parse(queryParams, true).query;
     const index = queryObject.index;
     const groceryList = readGroceryList();
     const deletedItem = groceryList[index];
@@ -60,9 +63,11 @@ function deleteGroceryList(req, res) {
     writeGroceryList(groceryList, fileName);
     showGroceryList(groceryList);
 
-    res.writeHead(200, { 'Content-Type': 'text/plain' });
-    res.write(JSON.stringify(deletedItem));
-    res.end();
+    res?.writeHead(200, { 'Content-Type': 'text/plain' });
+    res?.write(JSON.stringify(deletedItem));
+    res?.end();
+
+    return groceryList;
 }
 
 function showGroceryList(groceryList) {

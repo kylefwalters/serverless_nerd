@@ -34,7 +34,6 @@ function handleRequests(req, res) {
     let body = '';
     req.on('data', (chunk) => {
         body += chunk;
-        console.log(body);
     }).on('end', () => {
         switch(req.method){
             case 'GET':
@@ -44,10 +43,10 @@ function handleRequests(req, res) {
                 postGroceryList(body, res);
                 break;
             case 'PUT':
-                putGroceryList(req, body, res);
+                putGroceryList(req.url, body, res);
                 break;
             case 'DELETE':
-                deleteGroceryList(req, res);
+                deleteGroceryList(req.url, res);
                 break;
             default:
                 break;
