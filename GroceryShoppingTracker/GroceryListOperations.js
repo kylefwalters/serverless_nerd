@@ -1,49 +1,47 @@
-const fs = require('fs');
 const url = require('url');
-const {GroceryItem} = require('./GroceryItem');
+const uuid = require('uuid');
+const { unmarshall } = require('@aws-sdk/util-dynamodb');
+const { GroceryItem } = require('./GroceryItem');
+const GroceryDAO = require('./GroceryDAO');
 
-// static vars
-const fileName = 'groceries.json';
+async function getGroceryList(res) {
+    const groceryList = await readGroceryList();
 
-function getGroceryList(res) {
-    const groceryList = readGroceryList();
-
-    if(res) {
+    if (res) {
         res.writeHead(200, { 'Content-Type': 'text/plain' })
             .end(JSON.stringify(groceryList));
     }
     return groceryList;
 }
 
-function postGroceryList(body, res) {
-    const groceryList = readGroceryList();
-    const newGrocery = Object.assign(new GroceryItem(), JSON.parse(body));
+async function postGroceryList(body, res) {
+    const groceryList = await readGroceryList();
+    let newGrocery = Object.assign(new GroceryItem(), JSON.parse(body));
 
-    if(newGrocery) {
+    if (newGrocery) {
+        newGrocery = writeGroceryList(newGrocery.name, newGrocery.price, newGrocery.bought);
         groceryList.push(newGrocery);
-        writeGroceryList(groceryList, fileName);
         showGroceryList(groceryList);
 
         res?.writeHead(201, { 'Content-Type': 'text/plain' });
-    }else {
+    } else {
         res?.writeHead(400, { 'Content-Type': 'text/plain' });
     }
 
-    if(res) {
-        res.write(JSON.stringify(groceryList));
-        res.end();
-    }
+    res?.end(JSON.stringify(groceryList));
     return groceryList;
 }
 
-function putGroceryList(queryParams, body, res) {
+async function putGroceryList(queryParams, body, res) {
     const queryObject = url.parse(queryParams, true).query;
     const index = queryObject.index;
-    const groceryList = readGroceryList();
+    const groceryList = await readGroceryList();
     const newGroceryStatus = JSON.parse(body);
+    const key = {ItemID: groceryList[index].itemID};
 
-    groceryList[index].bought = newGroceryStatus.bought;
-    writeGroceryList(groceryList, fileName);
+    console.log(newGroceryStatus.purchased);
+    updateGroceryList(key, newGroceryStatus.purchased);
+    groceryList[index].purchased = newGroceryStatus.purchased;
     showGroceryList(groceryList);
 
     res?.writeHead(200, { 'Content-Type': 'text/plain' });
@@ -53,14 +51,15 @@ function putGroceryList(queryParams, body, res) {
     return groceryList[index];
 }
 
-function deleteGroceryList(queryParams, res) {
+async function deleteGroceryList(queryParams, res) {
     const queryObject = url.parse(queryParams, true).query;
     const index = queryObject.index;
-    const groceryList = readGroceryList();
+    const groceryList = await readGroceryList();
     const deletedItem = groceryList[index];
+    const key = {ItemID: deletedItem.itemID};
 
+    deleteFromGroceryList(key);
     groceryList.splice(index, 1);
-    writeGroceryList(groceryList, fileName);
     showGroceryList(groceryList);
 
     res?.writeHead(200, { 'Content-Type': 'text/plain' });
@@ -72,33 +71,38 @@ function deleteGroceryList(queryParams, res) {
 
 function showGroceryList(groceryList) {
     console.log("______________________________________________________________");
-    for(i = 0; i < groceryList.length; i++) {
+    for (i = 0; i < groceryList.length; i++) {
         console.log((i + 1) + ". " + groceryList[i].toString());
     }
     console.log("______________________________________________________________");
 }
 
-function readGroceryList() {
-    let groceryList;
-    if(fs.existsSync(fileName)) {
-        groceryList = JSON.parse(fs.readFileSync(fileName, 'utf8'));
-        // convert each item in array to GroceryItem
-        for(i = 0; i < groceryList.length; i++) {
-            groceryList[i] = Object.assign(new GroceryItem(), groceryList[i]);
-        }
-    } else {
-        groceryList = [new GroceryItem("Test", 1, 123)];
-        const data = new Uint8Array(Buffer.from(JSON.stringify(groceryList)));
-        fs.writeFileSync(fileName, data);
+async function readGroceryList() {
+    let groceryList = [];
+
+    const returnedList = await GroceryDAO.getList();
+    for (item of returnedList) {
+        const unmarshalledItem = unmarshall(item);
+        groceryList.push(new GroceryItem(unmarshalledItem.ItemID, unmarshalledItem.Name, unmarshalledItem.Price, unmarshalledItem.Purchased));
     }
 
     return groceryList;
 }
 
-function writeGroceryList(groceryList, fileName) {
-    const data = new Uint8Array(Buffer.from(JSON.stringify(groceryList)));
-    fs.writeFileSync(fileName, data);
+function writeGroceryList(Name, Price, Purchased) {
+    const ItemID = uuid.v4();
+    const item = { ItemID, Name, Price, Purchased };
+    GroceryDAO.createItem(item);
+    return item;
 }
 
-module.exports = 
-{getGroceryList, postGroceryList, putGroceryList, deleteGroceryList, fileName};
+function updateGroceryList(Key, Purchased) {
+    GroceryDAO.updateItem(Key, Purchased);
+}
+
+function deleteFromGroceryList(Key) {
+    GroceryDAO.deleteItem(Key);
+}
+
+module.exports =
+    { getGroceryList, postGroceryList, putGroceryList, deleteGroceryList };

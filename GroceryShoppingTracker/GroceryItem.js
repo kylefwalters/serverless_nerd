@@ -1,13 +1,13 @@
 class GroceryItem {
-    constructor(name, quantity, price, bought = false) {
+    constructor(itemID, name, price, purchased = false) {
+        this.itemID = itemID;
         this.name = name;
-        this.quantity = quantity;
         this.price = price;
-        this.bought = bought;
+        this.purchased = purchased;
     }
 
     toString() {
-        return `Name: ${this.name} Quantity: ${this.quantity} Price: $${this.price} Bought: ${this.bought}`;
+        return `ItemID: ${this.itemID} Name: ${this.name} Price: $${this.price} Bought: ${this.purchased}`;
     }
 }
 
