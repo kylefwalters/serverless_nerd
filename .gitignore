@@ -2,4 +2,5 @@
 .vscode/launch.json
 Week 1/GroceryShoppingTracker/app.log
 Week 1/GroceryShoppingTracker/groceries.json
-/GroceryShoppingTracker/node_modules
+**/node_modules*
+**/app.log*
